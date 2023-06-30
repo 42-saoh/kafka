@@ -1,0 +1,4 @@
+rootProject.name = 'hotdeal'
+include 'server1'
+include 'server2'
+include 'server3'
