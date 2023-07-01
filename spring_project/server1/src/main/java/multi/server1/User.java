@@ -4,13 +4,13 @@ import java.time.LocalDateTime;
 
 public class User {
     private String userID;
-    private LocalDateTime timestamp;
+    private LocalDateTime curTime;
 
     public User() {}
 
-    public User(String userID, LocalDateTime timestamp) {
+    public User(String userID, LocalDateTime curTime) {
         this.userID = userID;
-        this.timestamp = timestamp;
+        this.curTime = curTime;
     }
 
     public String getUserID() {
@@ -21,11 +21,11 @@ public class User {
         this.userID = userID;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
+    public LocalDateTime getCurTime() {
+        return curTime;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
+    public void setCurTime(LocalDateTime curTime) {
+        this.curTime = curTime;
     }
 }

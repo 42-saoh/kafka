@@ -13,13 +13,13 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String userID;
-    private LocalDateTime timestamp;
+    private LocalDateTime curTime;
 
     public UserEntity() {}
 
-    public UserEntity(String userID, LocalDateTime timestamp) {
+    public UserEntity(String userID, LocalDateTime curTime) {
         this.userID = userID;
-        this.timestamp = timestamp;
+        this.curTime = curTime;
     }
 
     public int getId() {
@@ -38,14 +38,15 @@ public class UserEntity {
         this.userID = userID;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
+    public LocalDateTime getCurTime() {
+        return curTime;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
+    public void setCurTime(LocalDateTime curTime) {
+        this.curTime = curTime;
     }
+
     public UserRedis toUserRedis() {
-        return new UserRedis(userID, timestamp);
+        return new UserRedis(userID, curTime);
     }
 }

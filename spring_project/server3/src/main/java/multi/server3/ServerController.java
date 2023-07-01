@@ -25,8 +25,13 @@ public class ServerController {
 
     @GetMapping("/hotdeal")
     public ResponseEntity<?> get(@RequestParam String userID) {
-        UserRedis user = redisTemplate.opsForValue().get(userID);
-        if (user == null) {
+        System.out.println("request get : " + userID);
+        try {
+            UserRedis user = redisTemplate.opsForValue().get(userID);
+            if (user == null) {
+                return ResponseEntity.badRequest().build();
+            }
+        } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok().build();
@@ -34,6 +39,7 @@ public class ServerController {
 
     @GetMapping("/end")
     public ResponseEntity<?> end() {
+        System.out.println("request end");
         if (!isEnd) {
             return ResponseEntity.badRequest().build();
         }
@@ -46,6 +52,7 @@ public class ServerController {
             if (isEnd)
                 return ;
             if (message.equals("end")) {
+                System.out.println("get!!#############");
                 isEnd = true;
                 kafkaTemplate.send("get", "get");
             }

@@ -37,24 +37,17 @@ export const Modal = ({closeModal} : ModalProps) => {
 
   const handleClick = () => {
     getResult().then((res) => {
-      if (res.status === 200) {
-        alert("당첨 되셨습니다!");
-      } else {
-        alert("당첨 되지 않았습니다.");
-      }
+      alert("당첨 되셨습니다!");
     }).catch((err) => {
-      alert(err);
+      alert("꽝 다음 기회에!");
     })
   }
 
   useEffect(() => {
     getAxios().then((res) => {
-      if (res.status === 200) {
         setLoading(false);
-      } else {
+      }).catch((err) => {
         setTimeout(getAxios, 3000);
-      }}).catch((err) => {
-        console.log(err);
       })
   }, []);
 

@@ -8,6 +8,11 @@ services:
       - 2181
     networks:
       - internal
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo 'ruok' | nc localhost 2181 | grep 'imok'"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
     restart: always
     environment:
         ZOO_MY_ID: 1
@@ -20,6 +25,11 @@ services:
       - 2181
     networks:
       - internal
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo 'ruok' | nc localhost 2181 | grep 'imok'"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
     restart: always
     environment:
         ZOO_MY_ID: 2
@@ -32,6 +42,11 @@ services:
       - 2181
     networks:
       - internal
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo 'ruok' | nc localhost 2181 | grep 'imok'"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
     restart: always
     environment:
         ZOO_MY_ID: 3
@@ -45,14 +60,17 @@ services:
     networks:
       - internal
     depends_on:
-      - zookeeper1
-      - zookeeper2
-      - zookeeper3
+      zookeeper1:
+        condition: service_healthy
+      zookeeper2:
+        condition: service_healthy
+      zookeeper3:
+        condition: service_healthy
     restart: always
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper1:2181,zookeeper2:2181,zookeeper3:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092
-      KAFKA_LISTENERS: PLAINTEXT://kafka1:9092
+      KAFKA_LISTENERS: PLAINTEXT://:9092
       KAFKA_BROKER_ID: 1
 
   kafka2:
@@ -63,14 +81,17 @@ services:
     networks:
       - internal
     depends_on:
-      - zookeeper1
-      - zookeeper2
-      - zookeeper3
+      zookeeper1:
+        condition: service_healthy
+      zookeeper2:
+        condition: service_healthy
+      zookeeper3:
+        condition: service_healthy
     restart: always
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper1:2181,zookeeper2:2181,zookeeper3:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9092
-      KAFKA_LISTENERS: PLAINTEXT://kafka2:9092
+      KAFKA_LISTENERS: PLAINTEXT://:9092
       KAFKA_BROKER_ID: 2
 
   kafka3:
@@ -81,14 +102,17 @@ services:
     networks:
       - internal
     depends_on:
-      - zookeeper1
-      - zookeeper2
-      - zookeeper3
+      zookeeper1:
+        condition: service_healthy
+      zookeeper2:
+        condition: service_healthy
+      zookeeper3:
+        condition: service_healthy
     restart: always
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper1:2181,zookeeper2:2181,zookeeper3:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:9092
-      KAFKA_LISTENERS: PLAINTEXT://kafka3:9092
+      KAFKA_LISTENERS: PLAINTEXT://:9092
       KAFKA_BROKER_ID: 3
 
   database:
@@ -102,6 +126,11 @@ services:
       - 3306
     networks:
       - internal
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
     environment:
       MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: kafka
@@ -135,9 +164,12 @@ services:
     expose:
       - 3000
     depends_on:
-      - kafka1
-      - kafka2
-      - kafka3
+      kafka1:
+        condition: service_started
+      kafka2:
+        condition: service_started
+      kafka3:
+        condition: service_started
     networks:
       - internal
     restart: always
@@ -149,11 +181,16 @@ services:
     expose:
       - 3000
     depends_on:
-      - kafka1
-      - kafka2
-      - kafka3
-      - database
-      - redis
+      kafka1:
+        condition: service_started
+      kafka2:
+        condition: service_started
+      kafka3:
+        condition: service_started
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - internal
     restart: always
@@ -165,11 +202,16 @@ services:
     expose:
       - 3000
     depends_on:
-      - kafka1
-      - kafka2
-      - kafka3
-      - database
-      - redis
+      kafka1:
+        condition: service_started
+      kafka2:
+        condition: service_started
+      kafka3:
+        condition: service_started
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - internal
     restart: always
@@ -181,10 +223,14 @@ services:
     expose:
       - 3000
     depends_on:
-      - kafka1
-      - kafka2
-      - kafka3
-      - redis
+      kafka1:
+        condition: service_started
+      kafka2:
+        condition: service_started
+      kafka3:
+        condition: service_started
+      redis:
+        condition: service_started
     networks:
       - internal
     restart: always

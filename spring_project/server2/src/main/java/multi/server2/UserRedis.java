@@ -8,13 +8,13 @@ import java.time.LocalDateTime;
 @RedisHash("User")
 public class UserRedis implements Serializable {
     private String userID;
-    private LocalDateTime timestamp;
+    private LocalDateTime curTime;
 
     public UserRedis() {}
 
-    public UserRedis(String userID, LocalDateTime timestamp) {
+    public UserRedis(String userID, LocalDateTime curTime) {
         this.userID = userID;
-        this.timestamp = timestamp;
+        this.curTime = curTime;
     }
 
     public String getUserID() {
@@ -25,11 +25,11 @@ public class UserRedis implements Serializable {
         this.userID = userID;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
+    public LocalDateTime getCurTime() {
+        return curTime;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
+    public void setCurTime(LocalDateTime curTime) {
+        this.curTime = curTime;
     }
 }
