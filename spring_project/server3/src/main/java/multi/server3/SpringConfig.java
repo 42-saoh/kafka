@@ -1,26 +1,39 @@
 package multi.server3;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.recipes.locks.InterProcessMutex;
+import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.listener.ChannelTopic;
 
 @Configuration
 public class SpringConfig {
+    @Value("${curator.connection-string}")
+    private String connectionString;
+
     @Bean
-    public RedisTemplate<String, UserRedis> redisTemplate(RedisConnectionFactory connectionFactory) {
-        ObjectMapper mapper = new ObjectMapper();
-        Jackson2JsonRedisSerializer<UserRedis> serializer = new Jackson2JsonRedisSerializer<>(UserRedis.class);
-        RedisTemplate<String, UserRedis> template = new RedisTemplate<>();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        serializer.setObjectMapper(mapper);
-        template.setConnectionFactory(connectionFactory);
-        template.setValueSerializer(serializer);
-        return template;
+    public ChannelTopic topic() {
+        return new ChannelTopic("end");
+    }
+
+    @Bean(destroyMethod = "close")
+    public CuratorFramework curatorFramework() {
+        CuratorFramework client = CuratorFrameworkFactory.newClient(connectionString, new ExponentialBackoffRetry(1000, 3));
+        client.start();
+        return client;
+    }
+
+    @Bean
+    public InterProcessMutex interProcessMutex(CuratorFramework client) {
+        String lockPath = "/lock";
+        try {
+            client.checkExists().creatingParentsIfNeeded().forPath(lockPath);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return new InterProcessMutex(client, lockPath);
     }
 }

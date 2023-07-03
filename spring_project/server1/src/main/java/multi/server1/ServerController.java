@@ -2,8 +2,8 @@ package multi.server1;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,31 +26,30 @@ public class ServerController {
         this.isEnd = false;
     }
 
+    @EventListener
+    public void onMessageReceived(MessageReceivedEvent event) {
+        System.out.println("onMessageReceived");
+        if (isEnd) {
+            return;
+        }
+        synchronized (this) {
+            isEnd = true;
+        }
+    }
+
     @RequestMapping("/hotdeal")
     public ResponseEntity<?> get() {
-        System.out.println("request get : " + isEnd);
         if (isEnd) {
             return ResponseEntity.ok().build();
         }
         User user = new User(UUID.randomUUID().toString(), LocalDateTime.now());
         try {
             String userJson = objectMapper.writeValueAsString(user);
-            System.out.println(userJson);
             kafkaTemplate.send("deal", userJson);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
         return ResponseEntity.ok().build();
-    }
-
-    @KafkaListener(topics = "end", groupId = "one")
-    public void listen(String message) {
-        System.out.println("end!!############# : " + message);
-        if (message.equals("end")) {
-            synchronized (this) {
-                isEnd = true;
-            }
-        }
     }
 }

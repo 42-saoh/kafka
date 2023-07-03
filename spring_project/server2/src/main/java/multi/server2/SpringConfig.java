@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.kafka.core.KafkaTemplate;
 
@@ -23,9 +24,9 @@ public class SpringConfig {
     @Bean
     public ServerService tigerService(ServerJPARepository serverJPARepository,
                                       ObjectMapper objectMapper,
-                                      KafkaTemplate<String, String> kafkaTemplate,
-                                      RedisTemplate<String, UserRedis> redisTemplate) {
-        return new ServerService(serverJPARepository, objectMapper, kafkaTemplate, redisTemplate);
+                                      RedisTemplate<String, UserRedis> redisTemplate,
+                                      ChannelTopic topic) {
+        return new ServerService(serverJPARepository, objectMapper, redisTemplate, topic);
     }
 
     @Bean(name = "userRedisTemplate")
@@ -36,5 +37,10 @@ public class SpringConfig {
         template.setConnectionFactory(connectionFactory);
         template.setValueSerializer(serializer);
         return template;
+    }
+
+    @Bean
+    public ChannelTopic topic() {
+        return new ChannelTopic("end");
     }
 }
